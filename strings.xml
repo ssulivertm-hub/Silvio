@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gravador de Corridas</string>
+    <string name="acc_desc">Lê os textos da tela dos apps de corrida para detectar o início e o fim da corrida e ligar ou desligar a gravação. Nada é enviado para fora do aparelho.</string>
+</resources>
