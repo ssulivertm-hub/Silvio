@@ -1,0 +1,61 @@
+name: Build APK
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Organizar pastas
+        run: |
+          P=app/src/main/java/br/motorista/gravador
+          mkdir -p $P app/src/main/res/xml app/src/main/res/values
+          mv -f *.java $P/ || true
+          mv -f AndroidManifest.xml app/src/main/ || true
+          mv -f accessibility_config.xml app/src/main/res/xml/ || true
+          mv -f strings.xml app/src/main/res/values/ || true
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.5.2' apply false
+          }
+          EOF
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'br.motorista.gravador'
+              compileSdk 34
+              defaultConfig {
+                  applicationId 'br.motorista.gravador'
+                  minSdk 29
+                  targetSdk 34
+                  versionCode 3
+                  versionName '1.2'
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Compilar
+        run: gradle assembleDebug --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gravador-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
